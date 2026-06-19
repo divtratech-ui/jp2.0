@@ -10,10 +10,7 @@ import { User } from "@supabase/supabase-js";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ListenButton from "@/components/listenbutton";
-<<<<<<< HEAD
 import DualSearchInput from "@/components/DualSearchInput";
-=======
->>>>>>> 1ad79e6 (first commit)
 
 const CJK_RE = /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/;
 

@@ -11,12 +11,7 @@ import { toast } from "sonner";
 import { Send, Loader2, BookOpen, Trash2, Edit, Save, X } from "lucide-react";
 import DictionaryResults from "@/components/DictionaryResults";
 import ListenButton from "@/components/listenbutton";
-<<<<<<< HEAD
 import DualSearchInput from "@/components/DualSearchInput";
-=======
->>>>>>> 1ad79e6 (first commit)
-
-const CJK_RE = /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/;
 
 const TextAnalysis = () => {
   const navigate = useNavigate();
