@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Send, Loader2, BookOpen, Trash2, Edit, Save, X } from "lucide-react";
 import DictionaryResults from "@/components/DictionaryResults";
-import ListenButton from "@/components/ListenButton";
+import ListenButton from "@/components/listenbutton";
 import DualSearchInput from "@/components/DualSearchInput";
 
 const CJK_RE = /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/;
