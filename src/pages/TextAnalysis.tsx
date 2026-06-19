@@ -10,7 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Send, Loader2, BookOpen, Trash2, Edit, Save, X } from "lucide-react";
 import DictionaryResults from "@/components/DictionaryResults";
-import ListenButton from "@/components/listenbutton";
+import ListenButton from "@/components/ListenButton";
+import DualSearchInput from "@/components/DualSearchInput";
 
 const CJK_RE = /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/;
 
@@ -335,11 +336,10 @@ const TextAnalysis = () => {
                       )}
                     </Button>
                     {vocabulary.length > 0 && (
-                      <Input
+                      <DualSearchInput
                         value={vocabSearch}
-                        onChange={(e) => setVocabSearch(e.target.value)}
+                        onChange={setVocabSearch}
                         placeholder="Search vocabulary..."
-                        className="w-full"
                       />
                     )}
                     <ScrollArea className="h-[calc(100vh-280px)]">
