@@ -10,7 +10,10 @@ import { User } from "@supabase/supabase-js";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ListenButton from "@/components/listenbutton";
+<<<<<<< HEAD
 import DualSearchInput from "@/components/DualSearchInput";
+=======
+>>>>>>> 1ad79e6 (first commit)
 
 const CJK_RE = /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/;
 
@@ -218,10 +221,17 @@ const Exercise = () => {
                 <p className="text-sm text-muted-foreground">No bookmarks yet. Add some from the dictionary!</p>
               ) : (
                 <>
+<<<<<<< HEAD
                   <DualSearchInput
                     value={bookmarkSearch}
                     onChange={setBookmarkSearch}
                     placeholder="Search bookmarks..."
+=======
+                  <Input
+                    placeholder="Search bookmarks..."
+                    value={bookmarkSearch}
+                    onChange={(e) => setBookmarkSearch(e.target.value)}
+>>>>>>> 1ad79e6 (first commit)
                   />
                   <div className="space-y-2">
                     {bookmarks
@@ -246,12 +256,16 @@ const Exercise = () => {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1">
+<<<<<<< HEAD
                               <div className="flex items-center gap-1">
                                 <div className="font-medium">{bookmark.word}</div>
                                 <div onClick={(e) => e.stopPropagation()}>
                                   <ListenButton text={bookmark.word} size="sm" className="h-6 w-6" />
                                 </div>
                               </div>
+=======
+                              <div className="font-medium">{bookmark.word}</div>
+>>>>>>> 1ad79e6 (first commit)
                               {bookmark.reading && (
                                 <div className="text-sm text-muted-foreground">{bookmark.reading}</div>
                               )}
