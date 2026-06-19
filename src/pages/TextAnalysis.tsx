@@ -334,18 +334,10 @@ const TextAnalysis = () => {
                       )}
                     </Button>
                     {vocabulary.length > 0 && (
-<<<<<<< HEAD
                       <DualSearchInput
                         value={vocabSearch}
                         onChange={setVocabSearch}
                         placeholder="Search vocabulary..."
-=======
-                      <Input
-                        value={vocabSearch}
-                        onChange={(e) => setVocabSearch(e.target.value)}
-                        placeholder="Search vocabulary..."
-                        className="w-full"
->>>>>>> 1ad79e6 (first commit)
                       />
                     )}
                     <ScrollArea className="h-[calc(100vh-280px)]">
