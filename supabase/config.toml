@@ -1,0 +1,25 @@
+project_id = "fiigpqkqnyhxcybusqua"
+
+[functions.jisho-search]
+verify_jwt = false
+
+[functions.explain-word]
+verify_jwt = false
+
+[functions.validate-sentence]
+verify_jwt = false
+
+[functions.exercise-chat]
+verify_jwt = false
+
+[functions.analyze-text]
+verify_jwt = false
+
+[functions.word-chat]
+verify_jwt = false
+
+[functions.translate-en-ja]
+verify_jwt = false
+
+[functions.tts-japanese]
+verify_jwt = false

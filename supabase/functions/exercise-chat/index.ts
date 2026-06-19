@@ -1,0 +1,168 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const getGeminiApiKey = () =>
+  Deno.env.get('GOOGLE_GENAI_API_KEY') ?? Deno.env.get('GEMINI_API_KEY');
+
+type GeminiResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+  }>;
+};
+
+const getGeminiText = (data: GeminiResponse) => {
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error('Gemini API returned an empty response or unexpected structure.');
+  }
+  return text;
+};
+
+const callGemini = async (apiKey: string, prompt: string) => {
+  let lastResponse: Response | undefined;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    lastResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        }),
+      }
+    );
+
+    if (lastResponse.status !== 503) {
+      break;
+    }
+
+    console.log(`Google Gemini is busy (503). Retrying attempt ${attempt} of 3...`);
+    await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+  }
+
+  return lastResponse;
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { message, sentence, validationResult, word, conversationHistory } = await req.json();
+    
+    if (!message) {
+      return new Response(
+        JSON.stringify({ error: 'Message is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Chat message received:', message);
+
+    const GEMINI_API_KEY = getGeminiApiKey();
+    if (!GEMINI_API_KEY) {
+      throw new Error('GOOGLE_GENAI_API_KEY or GEMINI_API_KEY is not configured');
+    }
+
+    // Build context for the AI
+    let contextPrompt = `You are a Japanese language tutor helping a student understand their sentence practice.`;
+    
+    if (sentence) {
+      contextPrompt += `\n\nStudent's sentence: "${sentence}"`;
+    }
+    
+    if (word) {
+      contextPrompt += `\nTarget word: "${word}"`;
+    }
+    
+    if (validationResult) {
+      contextPrompt += `\n\nYour previous validation:`;
+      contextPrompt += `\n- Correct: ${validationResult.isCorrect ? 'Yes' : 'No'}`;
+      contextPrompt += `\n- Explanation: ${validationResult.explanation}`;
+      if (validationResult.correctedSentence) {
+        contextPrompt += `\n- Corrected sentence: ${validationResult.correctedSentence}`;
+      }
+      if (validationResult.suggestions) {
+        contextPrompt += `\n- Suggestions: ${validationResult.suggestions}`;
+      }
+    }
+
+    contextPrompt += `\n\nAnswer the student's questions clearly and helpfully. Keep responses concise but thorough.`;
+
+    // Build messages array with conversation history
+    const messages = [
+      { role: 'system', content: contextPrompt }
+    ];
+
+    // Add conversation history if provided
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      messages.push(...conversationHistory);
+    }
+
+    // Add the current message
+    messages.push({ role: 'user', content: message });
+
+    const prompt = messages
+      .map((msg) => `${msg.role}: ${msg.content}`)
+      .join('\n');
+    const response = await callGemini(GEMINI_API_KEY, prompt);
+
+    if (!response) {
+      throw new Error('Failed to get response from Gemini API');
+    }
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 503) {
+        return new Response(
+          JSON.stringify({ error: 'Google Gemini is temporarily overloaded. Please try again in a moment.' }),
+          { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const errorText = await response.text();
+      console.error('Google Gemini API error:', response.status, errorText);
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('AI chat response received');
+    
+    const reply = getGeminiText(data);
+
+    return new Response(
+      JSON.stringify({ reply }),
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  } catch (error) {
+    console.error('Error in exercise-chat function:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+});
